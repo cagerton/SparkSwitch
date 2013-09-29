@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+
+<style>
+
+body {
+	background: #000;
+	color: #444;
+}
+label {
+	display: block;
+}
+label span {
+	font-family: helvetica;
+		font-size: 2em;
+		display: inline-block;
+		width: 3.5em;
+		margin-top:1em;
+		margin-bottom: 1em;
+		text-align: top
+
+}
+input {
+	display:inline-block;
+}
+
+input[type='range'] {
+    -webkit-appearance: none;  
+    height: 30px;
+    width: 400px;
+    -webkit-border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 5px #fff;
+    background: #222;
+}
+input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none !important;
+    -webkit-border-radius: 10px;
+    background-color: #555;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#444), to(#333));
+    border: 1px solid #232;
+    height: 44px;
+    width: 44px;
+}
+
+
+
+</style>
+</head>
+<body>
+
+
+<form action="/update" method="post">
+	<label>
+		<span>red</span>
+		<input type="range" min="1" max="255" name="red" value="1"></input>
+	</label>
+	<label><span>green</span><input type="range" min="1" max="255" name="green" value="1"></input></label>
+	<label><span>blue</span><input type="range" min="1" max="255" name="blue" value="1"></input></label>
+	<label><span>orange</span><input type="range" min="1" max="255"  name="orange" value="1"></input></label>
+	<label><span>white</span><input type="range" min="1" max="255" name="white" value="1"></input></label>
+</span>
+</form>
+
+
+<script>
+
+
+
+
+	var f= document.querySelector('form');
+	f.addEventListener("submit", function(e) {
+		e.preventDefault();
+		sendForm(f);
+	});
+	function sendForm(f){
+		var url = f.action;
+		var q = [].slice.apply(f.elements)
+
+			.filter(function(el){
+				return el.name;
+			})
+		    .map(function(el){
+				return escape(el.name) + "=" + escape(el.value);
+			}).join("&");
+		var xhr= new XMLHttpRequest();
+		xhr.open(f.method, url + "?" + q);
+		xhr.onreadystatechange = function(){console.log("updated");};
+		xhr.send();
+	}
+	f.addEventListener("change", function(){ sendForm(f);});
+
+
+	function activeRanges(){
+		var lastE = Date.now();
+
+		var ranges = [].slice.apply(document.querySelectorAll('input[type="range"]'));
+		ranges.forEach(function(range){
+			range.addEventListener("mousewheel", function(e){
+				e.preventDefault();
+				if(Date.now() < lastE + 100) return;
+				lastE = Date.now();
+
+				var old = range.value|0;
+				var val = old + (e.wheelDelta > 0 ? Math.sqrt(e.wheelDelta/3) : - Math.sqrt(- e.wheelDelta/3));
+				console.log(old,val);
+				if(val > range.max|0) val = range.max;
+				if(val < range.min|0) val = range.min;
+				range.value = val;
+				sendForm(f);
+			},false);
+		});
+	}
+	activeRanges();
+</script>
+</body>
+</html>
